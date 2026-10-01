@@ -44,11 +44,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "Event already processed" }, { status: 200 });
     }
 
-    // 3. Record event id to prevent reprocessing with clean try/catch error handling
+    // 3. Safely record event id with proper async/await error handling
     try {
-      await supabase.from("processed_events").insert({ event_id });
+      await Promise.resolve(
+        supabase.from("processed_events").insert({ event_id })
+      );
     } catch {
-      // Ignore duplicate key or insert race condition errors safely
+      // Ignore duplicate key or insert race conditions safely
     }
 
     // 4. Map exact case-sensitive statuses from Didit
@@ -56,7 +58,6 @@ export async function POST(req: Request) {
       const normalizedStatus = status.toLowerCase();
       
       // Find the pending verification linked to this session or user
-      // Update user verification and user role status accordingly...
       const { data: verification } = await supabase
         .from("user_verifications")
         .select("user_id")
