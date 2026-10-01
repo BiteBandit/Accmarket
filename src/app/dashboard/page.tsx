@@ -11,9 +11,11 @@ interface UserProfile {
   username: string;
   email: string;
   role: string;
-  avatar_url?: string | null; // <--- Add this line
+  avatar_url?: string | null;
   telegram_username?: string | null;
   telegram_notifications?: boolean;
+  trust_score?: number;
+  is_active?: boolean;
 }
 
 interface WalletData {
