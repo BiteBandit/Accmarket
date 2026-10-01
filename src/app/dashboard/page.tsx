@@ -120,23 +120,26 @@ export default function DashboardPage() {
           return;
         }
 
+
         if (profileData) {
           setProfile({
             ...profileData,
             email: profileData.email || userEmail,
             trust_score: profileData.trust_score ?? 60,
             is_active: profileData.is_active ?? true,
-          });
+          } as UserProfile);
         } else {
           setProfile({
+            id: user.id, // Ensure id is present for new profile fallback
             username: userEmail.split("@")[0] || "User",
             email: userEmail,
             role: "Member",
             kyc_status: "Unverified",
             trust_score: 60,
             is_active: true,
-          });
+          } as UserProfile);
         }
+
 
         const { data: walletData } = await supabase
           .from("wallets")
