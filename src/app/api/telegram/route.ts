@@ -1,28 +1,27 @@
-require('dotenv').config({ path: '.env.local' });
-const { Bot } = require('node-telegram-bot-api');
-const { createClient } = require('@supabase/supabase-js');
+import { Bot, webhookCallback } from 'node-telegram-bot-api';
+import { createClient } from '@supabase/supabase-js';
+import { NextResponse } from 'next/server';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const token = process.env.TELEGRAM_BOT_TOKEN;
 
 if (!supabaseUrl || !supabaseServiceKey || !token) {
-  console.error("❌ Missing environment variables! Check your .env.local file.");
-  process.exit(1);
+  console.error("❌ Missing environment variables for Telegram bot!");
 }
 
 // Initialize Supabase Client with Service Role Key
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+const supabase = createClient(supabaseUrl || '', supabaseServiceKey || '');
 
-// Initialize Telegram Bot using the modern Bot class
-const bot = new Bot(token);
+// Initialize Telegram Bot
+const bot = new Bot(token || '');
 
-console.log("🤖 AccMarket Telegram Bot is running locally...");
-
-// Listen for messages using the modern handler
+// Listen for messages using your original logic
 bot.on("message", async (ctx) => {
   const text = ctx.message?.text?.trim() || "";
-  const chatId = ctx.chat.id;
+  const chatId = ctx.chat?.id;
+
+  if (!chatId) return;
 
   console.log(`📥 Received message from chat ${chatId}: "${text}"`);
 
@@ -73,6 +72,10 @@ bot.on("message", async (ctx) => {
   }
 });
 
-// Start the bot polling loop using the modern runner syntax
-const { run } = require('node-telegram-bot-api/node');
-run(bot);
+// Export the web-standard webhook handler for Vercel
+export const POST = webhookCallback(bot, 'std/http');
+
+// Optional GET to verify the route is accessible
+export async function GET() {
+  return NextResponse.json({ status: 'Telegram bot webhook is running' });
+}

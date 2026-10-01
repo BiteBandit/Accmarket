@@ -82,8 +82,12 @@ export async function POST(request: Request) {
         return NextResponse.json({ received: true, duplicate: true }, { status: 200 });
       }
 
-      // Record event id to prevent reprocessing
-      await supabase.from("processed_events").insert({ event_id }).catch(() => {});
+      // Record event id to prevent reprocessing with proper try/catch
+      try {
+        await supabase.from("processed_events").insert({ event_id });
+      } catch {
+        // Ignore duplicate key or insertion errors gracefully
+      }
     }
 
     // 4. Map exact case-sensitive statuses from Didit
