@@ -72,8 +72,10 @@ bot.on("message", async (ctx) => {
   }
 });
 
-// Export the web-standard webhook handler for Vercel with type compatibility fix
-export const POST = webhookCallback(bot, 'std/http' as any);
+// Export the web-standard webhook handler with allowUnauthenticated options passed cleanly
+export const POST = webhookCallback(bot, {
+  allowUnauthenticated: true,
+} as any);
 
 // Optional GET to verify the route is accessible
 export async function GET() {
