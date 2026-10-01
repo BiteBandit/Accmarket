@@ -21,6 +21,19 @@ interface Wallet {
   escrow_balance: number;
 }
 
+function UpgradeSkeleton() {
+  return (
+    <div className="min-h-screen bg-[#fdfdfc] p-6 animate-pulse">
+      <div className="mx-auto max-w-4xl space-y-6">
+        <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+        <div className="h-64 bg-gray-200 rounded-[28px]"></div>
+        <div className="h-32 bg-gray-200 rounded-[28px]"></div>
+      </div>
+    </div>
+  );
+}
+
+
 export default function UpgradeToSellerPage() {
   const router = useRouter();
   const supabase = createClient();
