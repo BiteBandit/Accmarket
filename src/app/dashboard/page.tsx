@@ -91,7 +91,7 @@ export default function DashboardPage() {
   useEffect(() => {
     let channel: any;
 
-    async function loadDashboardData() {
+        async function loadDashboardData() {
       try {
         const {
           data: { user },
@@ -106,10 +106,10 @@ export default function DashboardPage() {
         const userId = user.id;
         const userEmail = user.email || "";
 
-        // Selected trust_score and is_active from profiles table[span_3](start_span)[span_3](end_span)
+        // Included 'id' in the select query so profileData.id is valid
         const { data: profileData } = await supabase
           .from("profiles")
-          .select("username, email, role, kyc_status, trust_score, is_active")
+          .select("id, username, email, role, kyc_status, trust_score, is_active")
           .eq("id", userId)
           .maybeSingle();
 
@@ -119,7 +119,6 @@ export default function DashboardPage() {
           router.push("/login?error=account_deactivated");
           return;
         }
-
 
         if (profileData) {
           setProfile({
@@ -140,7 +139,6 @@ export default function DashboardPage() {
             is_active: true,
           } as unknown as UserProfile);
         }
-
 
         const { data: walletData } = await supabase
           .from("wallets")
@@ -221,6 +219,7 @@ export default function DashboardPage() {
         setLoading(false);
       }
     }
+
 
     loadDashboardData();
 
