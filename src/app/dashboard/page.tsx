@@ -7,12 +7,13 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 interface UserProfile {
+  id: string;
   username: string;
   email: string;
   role: string;
-  kyc_status: string;
-  trust_score?: number;
-  is_active: boolean; 
+  avatar_url?: string | null; // <--- Add this line
+  telegram_username?: string | null;
+  telegram_notifications?: boolean;
 }
 
 interface WalletData {
