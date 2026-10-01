@@ -1348,6 +1348,88 @@ function BenefitCard({
   );
 }
 
+function SidebarLink({
+  href,
+  icon,
+  label,
+  active,
+  badge,
+}: {
+  href: string;
+  icon: React.ReactNode;
+  label: string;
+  active?: boolean;
+  badge?: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      className={`group flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium transition ${
+        active
+          ? "bg-[#0b1e5b] text-white shadow-md shadow-[#0b1e5b]/10"
+          : "text-[#4b5563] hover:bg-[#f5f7fb] hover:text-[#0b1e5b]"
+      }`}
+    >
+      <div className="flex items-center gap-3">
+        <span
+          className={`transition ${
+            active ? "text-white" : "text-[#6b7280] group-hover:text-[#0b1e5b]"
+          }`}
+        >
+          {icon}
+        </span>
+        <span>{label}</span>
+      </div>
+      {badge && <span className="h-2 w-2 rounded-full bg-red-500" />}
+    </Link>
+  );
+}
+
+function MobileLink({
+  href,
+  label,
+  icon,
+}: {
+  href: string;
+  label: string;
+  icon: React.ReactNode;
+}) {
+  return (
+    <Link
+      href={href}
+      className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-[#111111] transition hover:bg-[#f5f7fb]"
+    >
+      <span className="text-[#6b7280]">{icon}</span>
+      <span>{label}</span>
+    </Link>
+  );
+}
+
+function BottomNav({
+  href,
+  icon,
+  label,
+  active,
+}: {
+  href: string;
+  icon: React.ReactNode;
+  label: string;
+  active?: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      className={`flex flex-col items-center justify-center py-1.5 transition ${
+        active ? "text-[#0b1e5b]" : "text-[#9ca3af] hover:text-[#111111]"
+      }`}
+    >
+      <div className="h-5 w-5">{icon}</div>
+      <span className="mt-1 text-[10px] font-bold">{label}</span>
+    </Link>
+  );
+}
+
+
 function ProcessStep({
   number,
   title,
