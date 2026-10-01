@@ -123,21 +123,22 @@ export default function DashboardPage() {
 
         if (profileData) {
           setProfile({
+            id: profileData.id || user.id,
             ...profileData,
             email: profileData.email || userEmail,
             trust_score: profileData.trust_score ?? 60,
             is_active: profileData.is_active ?? true,
-          } as UserProfile);
+          } as unknown as UserProfile);
         } else {
           setProfile({
-            id: user.id, // Ensure id is present for new profile fallback
+            id: user.id,
             username: userEmail.split("@")[0] || "User",
             email: userEmail,
-            role: "Member",
+            role: "Buyer",
             kyc_status: "Unverified",
-            trust_score: 60,
+            trust_score: 0,
             is_active: true,
-          } as UserProfile);
+          } as unknown as UserProfile);
         }
 
 
