@@ -120,10 +120,10 @@ export default function DashboardPage() {
           return;
         }
 
-        if (profileData) {
+                if (profileData) {
           setProfile({
-            id: profileData.id || user.id,
             ...profileData,
+            id: profileData.id || user.id,
             email: profileData.email || userEmail,
             trust_score: profileData.trust_score ?? 60,
             is_active: profileData.is_active ?? true,
@@ -139,6 +139,7 @@ export default function DashboardPage() {
             is_active: true,
           } as unknown as UserProfile);
         }
+
 
         const { data: walletData } = await supabase
           .from("wallets")
