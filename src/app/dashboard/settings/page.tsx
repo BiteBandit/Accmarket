@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 interface UserProfile {
+  id: string; // Add this line here
   username: string;
   email: string;
   role: string;
@@ -21,6 +22,7 @@ interface UserProfile {
   telegram_chat_id?: string | null;
   telegram_notifications?: boolean;
 }
+
 
 const MARKETPLACE_PLATFORMS = [
   { name: "FACEBOOK", slug: "facebook" },
