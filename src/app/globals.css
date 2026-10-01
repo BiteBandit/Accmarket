@@ -1,26 +1,408 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-milk: #fdfdfc;
+  --color-dark-blue: #0b1e5b;
+  --color-black-custom: #111111;
+  --color-gray-custom: #6b7280;
+  --color-light-gray: #e5e7eb;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --milk: #fdfdfc;
+    --dark-blue: #0b1e5b;
+    --black: #111111;
+    --gray: #6b7280;
+    --light-gray: #e5e7eb;
+
+    --background: var(--milk);
+    --foreground: var(--black);
+  }
+
+  *,
+  ::before,
+  ::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    color-scheme: light;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    overflow-x: hidden;
+    min-height: 100vh;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* =========================================
+   ACCMARKET GRID BACKGROUND
+   ========================================= */
+
+.accmarket-grid {
+  background-image:
+    linear-gradient(
+      rgba(11, 30, 91, 0.06) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(11, 30, 91, 0.06) 1px,
+      transparent 1px
+    );
+
+  background-size: 32px 32px;
+  background-position: center top;
+}
+
+/* =========================================
+   CUSTOM SCROLLBARS
+   ========================================= */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #334155 transparent;
+}
+
+/* =========================================
+   LIGHT GRID OVERLAY FOR DARK SECTIONS
+   ========================================= */
+
+.accmarket-grid-light {
+  background-image:
+    linear-gradient(
+      rgba(255, 255, 255, 0.05) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.05) 1px,
+      transparent 1px
+    );
+
+  background-size: 32px 32px;
+  background-position: center top;
+}
+
+/* =========================================
+   FLOATING ORB ANIMATIONS
+   ========================================= */
+
+@keyframes floatOrb1 {
+  0%,
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+
+  50% {
+    transform: translate(-40px, 30px) scale(1.15);
+  }
+}
+
+@keyframes floatOrb2 {
+  0%,
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+
+  50% {
+    transform: translate(50px, -35px) scale(1.2);
+  }
+}
+
+.animate-float-1 {
+  animation: floatOrb1 8s ease-in-out infinite;
+}
+
+.animate-float-2 {
+  animation: floatOrb2 10s ease-in-out infinite;
+}
+
+/* =========================================
+   FAQ CTA ANIMATIONS
+   ========================================= */
+
+@keyframes cta-glow {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.55;
+  }
+
+  50% {
+    transform: translate(40px, -25px) scale(1.18);
+    opacity: 0.85;
+  }
+}
+
+@keyframes cta-glow-reverse {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.5;
+  }
+
+  50% {
+    transform: translate(-35px, 30px) scale(1.2);
+    opacity: 0.8;
+  }
+}
+
+@keyframes cta-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.35;
+  }
+
+  50% {
+    transform: scale(1.12);
+    opacity: 0.6;
+  }
+}
+
+@keyframes cta-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes cta-rotate-reverse {
+  from {
+    transform: rotate(360deg);
+  }
+
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+/* =========================================
+   CTA PARTICLES
+   ========================================= */
+
+@keyframes cta-particle-1 {
+  0%,
+  100% {
+    transform: translate(0, 0);
+    opacity: 0.2;
+  }
+
+  50% {
+    transform: translate(30px, -45px);
+    opacity: 0.8;
+  }
+}
+
+@keyframes cta-particle-2 {
+  0%,
+  100% {
+    transform: translate(0, 0);
+    opacity: 0.15;
+  }
+
+  50% {
+    transform: translate(-35px, 35px);
+    opacity: 0.7;
+  }
+}
+
+@keyframes cta-particle-3 {
+  0%,
+  100% {
+    transform: translate(0, 0);
+    opacity: 0.2;
+  }
+
+  50% {
+    transform: translate(25px, 40px);
+    opacity: 0.75;
+  }
+}
+
+@keyframes cta-particle-4 {
+  0%,
+  100% {
+    transform: translate(0, 0);
+    opacity: 0.15;
+  }
+
+  50% {
+    transform: translate(-30px, -30px);
+    opacity: 0.7;
+  }
+}
+
+@keyframes cta-particle-5 {
+  0%,
+  100% {
+    transform: translate(0, 0);
+    opacity: 0.2;
+  }
+
+  50% {
+    transform: translate(40px, 20px);
+    opacity: 0.8;
+  }
+}
+
+/* =========================================
+   CTA CONTENT ENTRANCE
+   ========================================= */
+
+@keyframes cta-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-cta-fade-up {
+  animation: cta-fade-up 0.8s ease-out both;
+}
+
+.cta-delay-1 {
+  animation-delay: 0.1s;
+}
+
+.cta-delay-2 {
+  animation-delay: 0.2s;
+}
+
+.cta-delay-3 {
+  animation-delay: 0.3s;
+}
+
+.cta-delay-4 {
+  animation-delay: 0.4s;
+}
+
+/* =========================================
+   CTA ANIMATION CLASSES
+   ========================================= */
+
+.animate-cta-glow {
+  animation: cta-glow 8s ease-in-out infinite;
+}
+
+.animate-cta-glow-reverse {
+  animation: cta-glow-reverse 10s ease-in-out infinite;
+}
+
+.animate-cta-breathe {
+  animation: cta-breathe 5s ease-in-out infinite;
+}
+
+.animate-cta-rotate {
+  animation: cta-rotate 18s linear infinite;
+}
+
+.animate-cta-rotate-reverse {
+  animation: cta-rotate-reverse 24s linear infinite;
+}
+
+.animate-cta-particle-1 {
+  animation: cta-particle-1 6s ease-in-out infinite;
+}
+
+.animate-cta-particle-2 {
+  animation: cta-particle-2 8s ease-in-out infinite;
+}
+
+.animate-cta-particle-3 {
+  animation: cta-particle-3 7s ease-in-out infinite;
+}
+
+.animate-cta-particle-4 {
+  animation: cta-particle-4 9s ease-in-out infinite;
+}
+
+.animate-cta-particle-5 {
+  animation: cta-particle-5 7.5s ease-in-out infinite;
+}
+
+/* =========================================
+   CTA BUTTON SHINE
+   ========================================= */
+
+.cta-button-shine {
+  position: absolute;
+  inset: 0;
+  transform: translateX(-120%);
+  background: linear-gradient(
+    110deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.55) 50%,
+    transparent 80%
+  );
+
+  transition: transform 0.7s ease;
+}
+
+.group:hover .cta-button-shine {
+  transform: translateX(120%);
+}
+
+/* =========================================
+   REDUCED MOTION ACCESSIBILITY
+   ========================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .animate-float-1,
+  .animate-float-2,
+  .animate-cta-glow,
+  .animate-cta-glow-reverse,
+  .animate-cta-breathe,
+  .animate-cta-rotate,
+  .animate-cta-rotate-reverse,
+  .animate-cta-particle-1,
+  .animate-cta-particle-2,
+  .animate-cta-particle-3,
+  .animate-cta-particle-4,
+  .animate-cta-particle-5,
+  .animate-cta-fade-up {
+    animation: none !important;
+  }
+
+  .cta-button-shine {
+    display: none;
+  }
 }
