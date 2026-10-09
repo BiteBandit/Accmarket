@@ -1,19 +1,31 @@
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useRef } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type MouseEvent,
+  type PointerEvent,
+} from "react";
 import { createClient } from "@/lib/supabase/client";
+import {
+  DesktopSidebar,
+  DesktopHeader,
+  MobileHeader,
+  MobileMenuDrawer,
+  BottomNav,
+} from "@/components/navigation";
 
 interface UserProfile {
-  username: string;
-  email: string;
+  username?: string | null;
+  email?: string | null;
   role: string;
   kyc_status: string;
   trust_score?: number;
   is_active: boolean;
-  avatar_url?: string;
+  avatar_url?: string | null;
 }
 
 interface Notification {
@@ -25,71 +37,203 @@ interface Notification {
   created_at: string;
 }
 
-const MARKETPLACE_PLATFORMS = [
-  { name: "FACEBOOK", slug: "facebook" },
-  { name: "TIKTOK", slug: "tiktok" },
-  { name: "INSTAGRAM", slug: "instagram" },
-  { name: "TWITTER", slug: "twitter" },
-  { name: "SNAPCHAT", slug: "snapchat" },
-  { name: "LINKEDIN", slug: "linkedin" },
-  { name: "REDDIT", slug: "reddit" },
-  { name: "PINTEREST", slug: "pinterest" },
-  { name: "DISCORD", slug: "discord" },
-  { name: "TWITCH", slug: "twitch" },
-  { 
-    name: "MAILS",
-    slug: "mails",
-    hasDropdown: true,
-    subItems: [
-      { name: "Gmail", slug: "mails-gmail" },
-      { name: "Outlook", slug: "mails-outlook" },
-      { name: "Yahoo", slug: "mails-yahoo" },
-      { name: "Hotmail", slug: "mails-hotmail" },
-      { name: "ProtonMail", slug: "mails-protonmail" },
-      { name: "Rambler", slug: "mails-rambler" },
-      { name: "Yandex", slug: "mails-yandex" },
-      { name: "Mail.ru", slug: "mails-mailru" },
-      { name: "Mail.com", slug: "mails-mailcom" },
-      { name: "AOL", slug: "mails-aol" },
-      { name: "GMX", slug: "mails-gmx" },
-      { name: "O2", slug: "mails-o2" },
-      { name: "Atomic Mail", slug: "mails-atomicmail" },
-      { name: "Onet", slug: "mails-onet" },
-    ]
-  },
-];
+function BellIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+    </svg>
+  );
+}
+
+function ShieldCheckIcon({
+  className = "h-5 w-5",
+}: {
+  className?: string;
+}) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M12 3l7 4v5c0 4.5-2.9 7.7-7 9-4.1-1.3-7-4.5-7-9V7l7-4z" />
+      <path d="m9 12 2 2 4-4" />
+    </svg>
+  );
+}
+
+function AlertCircleIcon({
+  className = "h-5 w-5",
+}: {
+  className?: string;
+}) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 8v4" />
+      <path d="M12 16h.01" />
+    </svg>
+  );
+}
+
+function CheckCircleIcon({
+  className = "h-5 w-5",
+}: {
+  className?: string;
+}) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="9" />
+      <path d="m8.5 12 2.3 2.3 4.7-5" />
+    </svg>
+  );
+}
+
+function TrashIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M4 7h16" />
+      <path d="M10 11v6" />
+      <path d="M14 11v6" />
+      <path d="M6 7l1 13h10l1-13" />
+      <path d="M9 7V4h6v3" />
+    </svg>
+  );
+}
+
+function XIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M6 6l12 12" />
+      <path d="M18 6L6 18" />
+    </svg>
+  );
+}
+
+function ArrowRightIcon({
+  className = "h-4 w-4",
+}: {
+  className?: string;
+}) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M5 12h14" />
+      <path d="m13 6 6 6-6 6" />
+    </svg>
+  );
+}
 
 export default function NotificationsPage() {
-  const [mobileMenu, setMobileMenu] = useState(false);
+  const router = useRouter();
+
+  const supabase = useMemo(() => createClient(), []);
+
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [hasUnread, setHasUnread] = useState(false);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
+  const [actionLoading, setActionLoading] = useState(false);
 
-  // Slide-in drawer & modal states
-  const [showPlatformDrawer, setShowPlatformDrawer] = useState(false);
-  const [sellerPromptModal, setSellerPromptModal] = useState(false);
-  const [mailsOpen, setMailsOpen] = useState(false);
+  const [sellerPromptDrawer, setSellerPromptDrawer] = useState(false);
 
-  // Selection / Long-press states
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
 
-  const router = useRouter();
-  const supabase = createClient();
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressTriggered = useRef(false);
+
+  const unreadCount = notifications.filter((n) => !n.is_read).length;
+  const hasUnread = unreadCount > 0;
+
+  const navProfile = {
+    username: profile?.username || "User",
+    email: profile?.email || "",
+    avatar_url: profile?.avatar_url || null,
+  };
+
+  const clearLongPressTimer = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  };
 
   const handleSignOut = async () => {
+    clearLongPressTimer();
     await supabase.auth.signOut();
     router.push("/login");
   };
 
   useEffect(() => {
-    let channel: any;
-    let notifChannel: any;
+    let profileChannel: any = null;
+    let notificationChannel: any = null;
+    let mounted = true;
 
-    async function loadNotificationsData() {
+    const loadNotificationsData = async () => {
+      setLoading(true);
+      setErrorMsg("");
+
       try {
         const {
           data: { user },
@@ -104,17 +248,25 @@ export default function NotificationsPage() {
         const userId = user.id;
         const userEmail = user.email || "";
 
-        const { data: profileData } = await supabase
+        const { data: profileData, error: profileError } = await supabase
           .from("profiles")
-          .select("username, email, role, kyc_status, trust_score, is_active, avatar_url")
+          .select(
+            "username, email, role, kyc_status, trust_score, is_active, avatar_url"
+          )
           .eq("id", userId)
           .maybeSingle();
 
-        if (profileData && profileData.is_active === false) {
+        if (profileError) {
+          console.error("Error fetching profile:", profileError);
+        }
+
+        if (profileData?.is_active === false) {
           await supabase.auth.signOut();
           router.push("/login?error=account_deactivated");
           return;
         }
+
+        if (!mounted) return;
 
         if (profileData) {
           setProfile({
@@ -131,44 +283,65 @@ export default function NotificationsPage() {
             kyc_status: "Unverified",
             trust_score: 60,
             is_active: true,
+            avatar_url: null,
           });
         }
 
         const { data: notifData, error: notifError } = await supabase
           .from("notifications")
-          .select("*")
+          .select(
+            "id, user_id, title, message, is_read, created_at"
+          )
           .eq("user_id", userId)
           .order("created_at", { ascending: false });
 
         if (notifError) {
           console.error("Error fetching notifications:", notifError);
-        } else {
-          setNotifications(notifData || []);
-          setHasUnread((notifData || []).some((n) => !n.is_read));
+
+          if (mounted) {
+            setErrorMsg(
+              "We couldn't load your notifications. Please try again."
+            );
+          }
+        } else if (mounted) {
+          setNotifications((notifData as Notification[]) || []);
         }
 
-        channel = supabase
+        profileChannel = supabase
           .channel(`profile-changes-${userId}`)
           .on(
-            'postgres_changes',
+            "postgres_changes",
             {
-              event: 'UPDATE',
-              schema: 'public',
-              table: 'profiles',
+              event: "UPDATE",
+              schema: "public",
+              table: "profiles",
               filter: `id=eq.${userId}`,
             },
             async (payload) => {
               const updatedProfile = payload.new as UserProfile;
+
               if (updatedProfile.is_active === false) {
                 await supabase.auth.signOut();
                 router.push("/login?error=account_deactivated");
+                return;
+              }
+
+              if (mounted) {
+                setProfile((prev) =>
+                  prev
+                    ? {
+                        ...prev,
+                        ...updatedProfile,
+                      }
+                    : prev
+                );
               }
             }
-          );
-        channel.subscribe();
+          )
+          .subscribe();
 
-        notifChannel = supabase
-          .channel(`notifications:user_id=eq.${userId}`)
+        notificationChannel = supabase
+          .channel(`notifications-${userId}`)
           .on(
             "postgres_changes",
             {
@@ -179,652 +352,801 @@ export default function NotificationsPage() {
             },
             (payload) => {
               const newNotification = payload.new as Notification;
-              setNotifications((prev) => [newNotification, ...prev]);
-              setHasUnread(true);
-            }
-          );
-        notifChannel.subscribe();
 
-      } catch (err) {
-        console.error("Unexpected error loading notifications page:", err);
+              if (!mounted) return;
+
+              setNotifications((prev) => {
+                if (prev.some((item) => item.id === newNotification.id)) {
+                  return prev;
+                }
+
+                return [newNotification, ...prev];
+              });
+            }
+          )
+          .subscribe();
+      } catch (error) {
+        console.error(
+          "Unexpected error loading notifications page:",
+          error
+        );
+
+        if (mounted) {
+          setErrorMsg(
+            "Something went wrong while loading your notifications."
+          );
+        }
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
-    }
+    };
 
     loadNotificationsData();
 
     return () => {
-      if (channel) supabase.removeChannel(channel);
-      if (notifChannel) supabase.removeChannel(notifChannel);
+      mounted = false;
+
+      if (profileChannel) {
+        supabase.removeChannel(profileChannel);
+      }
+
+      if (notificationChannel) {
+        supabase.removeChannel(notificationChannel);
+      }
     };
   }, [router, supabase]);
 
-  const handleListAccountClick = (e: React.MouseEvent) => {
-    e.preventDefault();
+  const handleListAccountClick = () => {
     const role = profile?.role?.toLowerCase();
-    if (role === "seller" || role === "vendor" || role === "admin") {
-      router.push("/sell");
+
+    if (
+      role === "seller" ||
+      role === "vendor" ||
+      role === "admin"
+    ) {
+      router.push("/dashboard/sell");
     } else {
-      setSellerPromptModal(true);
+      setSellerPromptDrawer(true);
     }
   };
 
   const markAsRead = async (id: string) => {
-    setNotifications((prev) => {
-      const updated = prev.map((n) => (n.id === id ? { ...n, is_read: true } : n));
-      setHasUnread(updated.some((n) => !n.is_read));
-      return updated;
-    });
+    const previousNotifications = notifications;
 
-    await supabase
+    setErrorMsg("");
+
+    setNotifications((prev) =>
+      prev.map((notification) =>
+        notification.id === id
+          ? { ...notification, is_read: true }
+          : notification
+      )
+    );
+
+    const { error } = await supabase
       .from("notifications")
       .update({ is_read: true })
       .eq("id", id);
-  };
 
-  const markAllAsRead = async () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
-    setHasUnread(false);
+    if (error) {
+      console.error("Error marking notification as read:", error);
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      await supabase
-        .from("notifications")
-        .update({ is_read: true })
-        .eq("user_id", user.id);
+      setNotifications(previousNotifications);
+      setErrorMsg("Couldn't update this notification.");
     }
   };
 
-  const deleteNotification = async (id: string, e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    setNotifications((prev) => {
-      const filtered = prev.filter((n) => n.id !== id);
-      setHasUnread(filtered.some((n) => !n.is_read));
-      return filtered;
-    });
+  const markAllAsRead = async () => {
+    if (actionLoading || unreadCount === 0) return;
 
-    await supabase
+    const previousNotifications = notifications;
+
+    setActionLoading(true);
+    setErrorMsg("");
+
+    setNotifications((prev) =>
+      prev.map((notification) => ({
+        ...notification,
+        is_read: true,
+      }))
+    );
+
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        router.push("/login");
+        return;
+      }
+
+      const { error } = await supabase
+        .from("notifications")
+        .update({ is_read: true })
+        .eq("user_id", user.id)
+        .eq("is_read", false);
+
+      if (error) {
+        throw error;
+      }
+    } catch (error) {
+      console.error("Error marking all notifications as read:", error);
+      setNotifications(previousNotifications);
+      setErrorMsg("Couldn't mark all notifications as read.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const deleteNotification = async (
+    id: string,
+    event?: MouseEvent<HTMLButtonElement>
+  ) => {
+    event?.stopPropagation();
+
+    const previousNotifications = notifications;
+    setErrorMsg("");
+
+    setNotifications((prev) =>
+      prev.filter((notification) => notification.id !== id)
+    );
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+
+    const { error } = await supabase
       .from("notifications")
       .delete()
-      .eq("id", id);
+      .eq("id", id)
+      .eq("user_id", user.id);
+
+    if (error) {
+      console.error("Error deleting notification:", error);
+      setNotifications(previousNotifications);
+      setErrorMsg("Couldn't delete this notification.");
+    }
   };
 
   const deleteSelected = async () => {
-    if (selectedIds.length === 0) return;
-    
+    if (selectedIds.length === 0 || actionLoading) return;
+
     const idsToDelete = [...selectedIds];
-    setNotifications((prev) => {
-      const filtered = prev.filter((n) => !idsToDelete.includes(n.id));
-      setHasUnread(filtered.some((n) => !n.is_read));
-      return filtered;
-    });
+    const previousNotifications = notifications;
+
+    setActionLoading(true);
+    setErrorMsg("");
+
+    setNotifications((prev) =>
+      prev.filter((notification) => !idsToDelete.includes(notification.id))
+    );
 
     setSelectedIds([]);
     setIsSelectMode(false);
 
-    await supabase
-      .from("notifications")
-      .delete()
-      .in("id", idsToDelete);
-  };
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-  const handleTouchStart = (id: string) => {
-    longPressTimer.current = setTimeout(() => {
-      setIsSelectMode(true);
-      toggleSelect(id);
-    }, 600);
-  };
+      if (!user) {
+        router.push("/login");
+        return;
+      }
 
-  const handleTouchEnd = () => {
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current);
+      const { error } = await supabase
+        .from("notifications")
+        .delete()
+        .in("id", idsToDelete)
+        .eq("user_id", user.id);
+
+      if (error) {
+        throw error;
+      }
+    } catch (error) {
+      console.error("Error deleting selected notifications:", error);
+      setNotifications(previousNotifications);
+      setErrorMsg("Couldn't delete the selected notifications.");
+    } finally {
+      setActionLoading(false);
     }
   };
 
-  const toggleSelect = (id: string) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
+  const handlePointerDown = (
+    id: string,
+    event: PointerEvent<HTMLDivElement>
+  ) => {
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+
+    clearLongPressTimer();
+    longPressTriggered.current = false;
+
+    longPressTimer.current = setTimeout(() => {
+      longPressTriggered.current = true;
+
+      setIsSelectMode(true);
+      setSelectedIds((prev) =>
+        prev.includes(id) ? prev : [...prev, id]
+      );
+
+      if (
+        typeof navigator !== "undefined" &&
+        "vibrate" in navigator
+      ) {
+        navigator.vibrate(35);
+      }
+    }, 600);
   };
 
-  const displayName = profile?.username?.trim() || profile?.email?.split("@")[0] || "User";
-  const userInitial = displayName.charAt(0).toUpperCase();
-  const unreadCount = notifications.filter((n) => !n.is_read).length;
+  const handlePointerUp = () => {
+    clearLongPressTimer();
+  };
+
+  const handlePointerCancel = () => {
+    clearLongPressTimer();
+  };
+
+  const handleNotificationClick = (id: string, isRead: boolean) => {
+    if (longPressTriggered.current) {
+      longPressTriggered.current = false;
+      return;
+    }
+
+    if (isSelectMode) {
+      setSelectedIds((prev) =>
+        prev.includes(id)
+          ? prev.filter((item) => item !== id)
+          : [...prev, id]
+      );
+      return;
+    }
+
+    if (!isRead) {
+      markAsRead(id);
+    }
+  };
+
+  const exitSelectMode = () => {
+    setIsSelectMode(false);
+    setSelectedIds([]);
+  };
+
+  const formatDate = (date: string) => {
+    return new Date(date).toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
 
   return (
-    <main className="accmarket-grid min-h-screen bg-[#fdfdfc] text-[#111111][span_0](start_span)[span_0](end_span)">
+    <main className="accmarket-grid min-h-screen bg-[#fdfdfc] text-[#111111]">
+      <DesktopSidebar
+        profile={navProfile}
+        hasUnread={hasUnread}
+        onSignOut={handleSignOut}
+        onListAccountClick={handleListAccountClick}
+      />
 
-      {/* =========================
-          DESKTOP SIDEBAR
-      ========================== */}
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[250px] border-r border-[#e5e7eb] bg-white lg:block">
-        <div className="flex h-20 items-center justify-center border-b border-[#e5e7eb] px-6">
-          <Link href="/" className="relative flex items-center justify-center w-full h-12">
-            <Image
-              src="/images/logo.png"
-              alt="AccMarket"
-              fill
-              priority
-              className="object-contain object-left"
-            />
-          </Link>
-        </div>
+      <MobileHeader setMobileMenuOpen={setMobileMenuOpen} />
 
-        <nav className="px-4 py-6 space-y-1">
-          <SidebarLink href="/dashboard" label="Dashboard" icon={<DashboardIcon />} />
-          <SidebarLink href="/dashboard/wallet" label="Wallet" icon={<WalletIcon />} />
-          <SidebarLink href="/dashboard/transactions" label="Transactions" icon={<TransactionIcon />} />
-          <button 
-            onClick={handleListAccountClick}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-[#6b7280] transition hover:bg-[#f5f7fb] hover:text-[#0b1e5b]"
-          >
-            <ChartIcon />
-            Sell account
-          </button>
-          <SidebarLink href="/dashboard/messages" label="My chats" icon={<MessageIcon />} />
-          <SidebarLink href="/dashboard/notifications" label="Notification" icon={<BellIcon hasUnread={hasUnread} />} />
-          <SidebarLink href="/dashboard/api" label="API & Webhooks" icon={<ApiIcon />} />
-          <SidebarLink href="/dashboard/support" label="Support" icon={<SupportIcon />} />
-          <SidebarLink href="/dashboard/settings" label="Settings" active icon={<SettingsIcon />} />
+      <MobileMenuDrawer
+        isOpen={mobileMenuOpen}
+        setIsOpen={setMobileMenuOpen}
+        profile={navProfile}
+        hasUnread={hasUnread}
+        onSignOut={handleSignOut}
+        onListAccountClick={handleListAccountClick}
+      />
 
-          <div className="my-4 border-t border-[#e5e7eb]" />
+      <div className="lg:pl-[260px]">
+        <DesktopHeader
+          profile={navProfile}
+          hasUnread={hasUnread}
+          pageTitle="Notifications"
+          sectionLabel="Account"
+        />
 
-          <button
-            onClick={handleSignOut}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-red-600 transition hover:bg-red-50"
-          >
-            <LogoutIcon />
-            Log out
-          </button>
-        </nav>
-
-        <div className="absolute bottom-0 left-0 right-0 border-t border-[#e5e7eb] p-4">
-          <div className="flex items-center gap-3 rounded-xl p-2">
-            {profile?.avatar_url ? (
-              <img src={profile.avatar_url} alt="Avatar" className="h-9 w-9 shrink-0 rounded-full object-cover" />
-            ) : (
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#0b1e5b] text-xs font-bold text-white">
-                {userInitial}
-              </div>
-            )}
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-bold text-[#111111]">
-                {displayName}
-              </p>
-              <p className="truncate text-[11px] uppercase tracking-wider text-[#0b1e5b] font-semibold">
-                {profile?.role || "Buyer"}
-              </p>
-            </div>
-            <button
-              onClick={handleSignOut}
-              title="Sign out"
-              className="text-[#9ca3af] transition hover:text-[#0b1e5b]"
-            >
-              <MoreIcon />
-            </button>
-          </div>
-        </div>
-      </aside>
-
-      {/* =========================
-          MOBILE HEADER
-      ========================== */}
-      <header className="sticky top-0 z-50 flex h-16 items-center justify-between border-b border-[#e5e7eb] bg-[#fdfdfc]/90 px-4 backdrop-blur-xl lg:hidden">
-        <Link href="/" className="relative h-10 w-[120px]">
-          <Image
-            src="/images/logo.png"
-            alt="AccMarket"
-            fill
-            priority
-            className="object-contain object-left"
-          />
-        </Link>
-        <button
-          onClick={() => setMobileMenu(!mobileMenu)}
-          className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#e5e7eb] bg-white shadow-sm"
-        >
-          <MenuIcon />
-        </button>
-      </header>
-
-      {/* =========================
-          MOBILE MENU
-      ========================== */}
-      {mobileMenu && (
-        <div className="fixed inset-x-0 top-16 z-40 border-b border-[#e5e7eb] bg-white p-4 shadow-lg lg:hidden">
-          <div className="space-y-1">
-            <MobileLink href="/dashboard" label="Dashboard" icon={<DashboardIcon />} />
-            <MobileLink href="/dashboard/wallet" label="Wallet" icon={<WalletIcon />} />
-            <MobileLink href="/dashboard/transactions" label="Transactions" icon={<TransactionIcon />} />
-            <button
-              onClick={handleListAccountClick}
-              className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-[#111111] hover:bg-[#f5f7fb] hover:text-[#0b1e5b] text-left"
-            >
-              <span className="text-[#6b7280]"><ChartIcon /></span>
-              Sell account
-            </button>
-            <MobileLink href="/dashboard/messages" label="My chats" icon={<MessageIcon />} />
-            <MobileLink href="/dashboard/notifications" label="Notification" icon={<BellIcon hasUnread={hasUnread} />} />
-            <MobileLink href="/dashboard/api" label="API & Webhooks" icon={<ApiIcon />} />
-            <MobileLink href="/dashboard/support" label="Support" icon={<SupportIcon />} />
-            <MobileLink href="/dashboard/settings" label="Settings" icon={<SettingsIcon />} />
-            <div className="pt-2">
-              <button
-                onClick={handleSignOut}
-                className="flex w-full items-center gap-3 rounded-xl bg-red-50 px-4 py-3 text-sm font-bold text-red-600 transition hover:bg-red-100"
-              >
-                <LogoutIcon />
-                Log out
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* =========================
-          MAIN CONTENT
-      ========================== */}
-      <div className="lg:pl-[250px]">
-        <div className="mx-auto max-w-4xl px-4 py-6 pb-28 sm:px-6 lg:px-8 lg:py-8">
-
-          {/* Header Title Section */}
-          <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+        <div className="mx-auto max-w-5xl px-4 py-6 pb-28 sm:px-6 lg:px-8 lg:py-8">
+          {/* Page heading */}
+          <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h1 className="text-2xl font-black tracking-tight text-[#111111] sm:text-3xl">
-                Notifications {unreadCount > 0 && <span className="ml-2 px-2.5 py-0.5 text-xs rounded-full bg-[#0b1e5b] text-white font-bold">{unreadCount}</span>}
-              </h1>
-              <p className="mt-1 text-xs text-[#6b7280]">
-                Stay updated with your account activity and real-time alerts.
+              <div className="mb-3 flex items-center gap-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#0b1e5b]" />
+                <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#6b7280]">
+                  Account Center
+                </span>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3">
+                <h1 className="text-2xl font-black tracking-tight text-[#111111] sm:text-3xl">
+                  Notifications
+                </h1>
+
+                {unreadCount > 0 && (
+                  <span className="rounded-full bg-[#0b1e5b] px-2.5 py-1 text-[10px] font-bold text-white">
+                    {unreadCount} unread
+                  </span>
+                )}
+              </div>
+
+              <p className="mt-2 max-w-xl text-xs leading-relaxed text-[#6b7280]">
+                Stay updated with important activity, account changes,
+                security alerts, and marketplace notifications.
               </p>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {isSelectMode ? (
                 <>
                   <button
-                    onClick={() => {
-                      setIsSelectMode(false);
-                      setSelectedIds([]);
-                    }}
-                    className="rounded-xl border border-[#e5e7eb] bg-white px-3 py-2 text-xs font-semibold text-[#6b7280] transition hover:bg-[#f5f7fb]"
+                    type="button"
+                    onClick={exitSelectMode}
+                    disabled={actionLoading}
+                    className="inline-flex items-center gap-2 rounded-xl border border-[#e5e7eb] bg-white px-3.5 py-2.5 text-xs font-semibold text-[#6b7280] shadow-sm transition hover:bg-[#f8fafc] disabled:cursor-not-allowed disabled:opacity-50"
                   >
+                    <XIcon className="h-3.5 w-3.5" />
                     Cancel
                   </button>
+
                   <button
+                    type="button"
                     onClick={deleteSelected}
-                    disabled={selectedIds.length === 0}
-                    className="rounded-xl bg-red-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-red-700 disabled:opacity-50"
+                    disabled={
+                      selectedIds.length === 0 || actionLoading
+                    }
+                    className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    Delete Selected ({selectedIds.length})
+                    <TrashIcon className="h-3.5 w-3.5" />
+                    Delete Selected
+                    <span className="rounded-md bg-white/15 px-1.5 py-0.5">
+                      {selectedIds.length}
+                    </span>
                   </button>
                 </>
               ) : (
-                <>
-                  {unreadCount > 0 && (
-                    <button
-                      onClick={markAllAsRead}
-                      className="rounded-xl border border-[#e5e7eb] bg-white px-4 py-2 text-xs font-semibold text-[#0b1e5b] transition hover:bg-[#f5f7fb]"
-                    >
-                      Mark all as read
-                    </button>
-                  )}
-                </>
+                unreadCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={markAllAsRead}
+                    disabled={actionLoading}
+                    className="inline-flex items-center gap-2 rounded-xl border border-[#e5e7eb] bg-white px-4 py-2.5 text-xs font-semibold text-[#0b1e5b] shadow-sm transition hover:border-[#d5dce7] hover:bg-[#f8fafc] disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <CheckCircleIcon className="h-3.5 w-3.5" />
+                    Mark all as read
+                  </button>
+                )
               )}
             </div>
           </div>
 
-          {/* Error Message */}
+          {/* Error */}
           {errorMsg && (
-            <div className="mb-6 rounded-xl bg-red-50 p-3 text-xs font-medium text-red-600 border border-red-200">
-              {errorMsg}
+            <div className="mb-6 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-600">
+                <AlertCircleIcon className="h-4 w-4" />
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-bold text-red-700">
+                  Something went wrong
+                </p>
+                <p className="mt-0.5 text-[11px] leading-relaxed text-red-600">
+                  {errorMsg}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setErrorMsg("")}
+                className="rounded-lg p-1.5 text-red-400 transition hover:bg-red-100 hover:text-red-700"
+                aria-label="Dismiss error"
+              >
+                <XIcon className="h-4 w-4" />
+              </button>
             </div>
           )}
 
-              {/* Notifications List - Standalone Cards */}
-          <div className="space-y-4">
-            <p className="text-[11px] text-[#9ca3af] mb-2 px-1 italic">
-              💡 Tip: Long-press any notification card to select and delete items.
-            </p>
-
-            {loading ? (
-              // Skeleton Loader State
-              <div className="space-y-4">
-                {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <div
-                    key={i}
-                    className="flex animate-pulse items-start gap-4 rounded-2xl border border-[#e5e7eb] bg-white p-4 sm:p-5 shadow-[0_4px_20px_rgba(15,23,42,0.04)]"
-                  >
-                    <div className="h-9 w-9 shrink-0 rounded-xl bg-gray-200" />
-                    <div className="min-w-0 flex-1 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <div className="h-4 w-1/3 rounded bg-gray-200" />
-                        <div className="h-3 w-16 rounded bg-gray-100" />
-                      </div>
-                      <div className="h-3.5 w-4/5 rounded bg-gray-100" />
-                      <div className="h-3 w-24 rounded bg-gray-100 pt-1" />
-                    </div>
-                  </div>
-                ))}
+          {/* Select mode banner */}
+                 {isSelectMode && (
+            <div className="mb-5 flex items-center gap-3 rounded-2xl border border-[#dbe4f0] bg-[#f4f7fb] px-4 py-3">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#0b1e5b] text-white">
+                <CheckCircleIcon className="h-4 w-4" />
               </div>
-            ) : notifications.length === 0 ? (
-              <div className="rounded-2xl border border-[#e5e7eb] bg-white p-12 text-center shadow-[0_4px_20px_rgba(15,23,42,0.04)] relative z-10">
-                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#f8fafc] border border-[#e2e8f0] text-[#9ca3af] shadow-sm">
-                  <BellIcon size={24} />
-                </div>
-                <h3 className="mt-4 text-sm font-bold text-[#111111]">No notifications yet</h3>
-                <p className="mt-1 text-xs text-[#6b7280] max-w-xs mx-auto">
-                  We will notify you right here when important updates occur on your account.
+
+              <div>
+                <p className="text-xs font-bold text-[#111111]">
+                  Selection mode
+                </p>
+                <p className="text-[11px] text-[#6b7280]">
+                  Select the notifications you want to remove.
                 </p>
               </div>
-            ) : (
-              notifications.map((item) => {
-                const isSelected = selectedIds.includes(item.id);
+            </div>
+          )}
 
-                return (
-                  <div
-                    key={item.id}
-                    onMouseDown={() => handleTouchStart(item.id)}
-                    onMouseUp={handleTouchEnd}
-                    onTouchStart={() => handleTouchStart(item.id)}
-                    onTouchEnd={handleTouchEnd}
-                    onClick={() => {
-                      if (isSelectMode) {
-                        toggleSelect(item.id);
-                      } else if (!item.is_read) {
-                        markAsRead(item.id);
+          {/* Notification section */}
+          <section>
+            <div className="mb-3 flex items-center justify-between px-1">
+              <div>
+                <h2 className="text-xs font-bold uppercase tracking-[0.12em] text-[#374151]">
+                  Recent activity
+                </h2>
+              </div>
+
+              {notifications.length > 0 && (
+                <span className="text-[10px] font-medium text-[#9ca3af]">
+                  {notifications.length}{" "}
+                  {notifications.length === 1
+                    ? "notification"
+                    : "notifications"}
+                </span>
+              )}
+            </div>
+
+            <div className="space-y-3">
+              {loading ? (
+                <>
+                  {[1, 2, 3, 4, 5].map((item) => (
+                    <div
+                      key={item}
+                      className="flex animate-pulse items-start gap-4 rounded-2xl border border-[#e5e7eb] bg-white p-5 shadow-[0_4px_20px_rgba(15,23,42,0.04)]"
+                    >
+                      <div className="h-10 w-10 shrink-0 rounded-xl bg-[#eef1f5]" />
+
+                      <div className="min-w-0 flex-1 space-y-2.5">
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="h-3.5 w-32 rounded bg-[#e8ebef]" />
+                          <div className="h-3 w-16 rounded bg-[#f0f2f5]" />
+                        </div>
+
+                        <div className="h-3 w-4/5 rounded bg-[#f0f2f5]" />
+                        <div className="h-3 w-24 rounded bg-[#f0f2f5]" />
+                      </div>
+                    </div>
+                  ))}
+                </>
+              ) : notifications.length === 0 ? (
+                <div className="relative overflow-hidden rounded-2xl border border-[#e5e7eb] bg-white p-10 text-center shadow-[0_4px_20px_rgba(15,23,42,0.04)] sm:p-14">
+                  <div className="absolute inset-x-0 top-0 h-1 bg-[#0b1e5b]" />
+
+                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-[#e2e8f0] bg-[#f8fafc] text-[#0b1e5b] shadow-sm">
+                    <BellIcon className="h-7 w-7" />
+                  </div>
+
+                  <h3 className="mt-5 text-sm font-bold text-[#111111]">
+                    You're all caught up
+                  </h3>
+
+                  <p className="mx-auto mt-2 max-w-sm text-xs leading-relaxed text-[#6b7280]">
+                    There are no notifications to show right now.
+                    Important account and marketplace updates will
+                    appear here.
+                  </p>
+
+                  <div className="mt-5 inline-flex items-center gap-1.5 text-[10px] font-semibold text-emerald-600">
+                    <CheckCircleIcon className="h-3.5 w-3.5" />
+                    Notifications are up to date
+                  </div>
+                </div>
+              ) : (
+                notifications.map((item) => {
+                  const isSelected = selectedIds.includes(item.id);
+
+                  return (
+                    <div
+                      key={item.id}
+                      onPointerDown={(event) =>
+                        handlePointerDown(item.id, event)
                       }
-                    }}
-                    className={`group relative p-4 sm:p-5 rounded-2xl border transition cursor-pointer flex items-start gap-4 select-none bg-white shadow-[0_4px_20px_rgba(15,23,42,0.04)] relative z-10 ${
-                      isSelected
-                        ? "bg-blue-50/60 border-blue-300 ring-1 ring-blue-300"
-                        : item.is_read
-                        ? "border-[#e5e7eb] hover:border-[#cbd5e1]"
-                        : "border-[#cbd5e1] hover:border-[#94a3b8]"
-                    }`}
-                  >
-                    {/* Checkbox in select mode */}
-                    {isSelectMode && (
-                      <div className="flex h-5 items-center pt-0.5">
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={() => toggleSelect(item.id)}
-                          className="h-4 w-4 rounded border-gray-300 text-[#0b1e5b] focus:ring-[#0b1e5b]"
-                        />
-                      </div>
-                    )}
+                      onPointerUp={handlePointerUp}
+                      onPointerCancel={handlePointerCancel}
+                      onPointerLeave={handlePointerCancel}
+                      onClick={() =>
+                        handleNotificationClick(
+                          item.id,
+                          item.is_read
+                        )
+                      }
+                      className={`group relative flex cursor-pointer select-none items-start gap-4 rounded-2xl border bg-white p-4 shadow-[0_4px_20px_rgba(15,23,42,0.04)] transition sm:p-5 ${
+                        isSelected
+                          ? "border-[#9db3d7] bg-[#f4f7fb] ring-1 ring-[#b7c8e2]"
+                          : item.is_read
+                          ? "border-[#e5e7eb] hover:border-[#d1d9e5] hover:shadow-[0_6px_24px_rgba(15,23,42,0.06)]"
+                          : "border-[#d4dce8] hover:border-[#aebed3] hover:shadow-[0_6px_24px_rgba(15,23,42,0.07)]"
+                      }`}
+                    >
+                      {isSelectMode && (
+                        <div className="flex h-5 shrink-0 items-center pt-0.5">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() =>
+                              setSelectedIds((prev) =>
+                                prev.includes(item.id)
+                                  ? prev.filter(
+                                      (selectedId) =>
+                                        selectedId !== item.id
+                                    )
+                                  : [...prev, item.id]
+                              )
+                            }
+                            onClick={(event) =>
+                              event.stopPropagation()
+                            }
+                            className="h-4 w-4 rounded border-[#cbd5e1] text-[#0b1e5b] focus:ring-[#0b1e5b]"
+                            aria-label={`Select ${item.title}`}
+                          />
+                        </div>
+                      )}
 
-                    {/* Icon indicator */}
-                    {!isSelectMode && (
-                      <div className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border ${
-                        item.is_read 
-                          ? "bg-[#f9fafb] border-[#e5e7eb] text-[#9ca3af]" 
-                          : "bg-[#0b1e5b]/5 border-[#0b1e5b]/20 text-[#0b1e5b]"
-                      }`}>
-                        <BellIcon size={16} />
-                      </div>
-                    )}
+                      {!isSelectMode && (
+                        <div
+                          className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${
+                            item.is_read
+                              ? "border-[#e5e7eb] bg-[#f8fafc] text-[#9ca3af]"
+                              : "border-[#dbe4f0] bg-[#eef3fb] text-[#0b1e5b]"
+                          }`}
+                        >
+                          <BellIcon className="h-[18px] w-[18px]" />
+                        </div>
+                      )}
 
-                    <div className="min-w-0 flex-1 space-y-1">
-                      <div className="flex items-center justify-between gap-2">
-                        <h3 className={`text-sm tracking-tight ${item.is_read ? "font-medium text-[#374151]" : "font-bold text-[#0b1e5b]"}`}>
-                          {item.title}
-                        </h3>
-                        {!item.is_read && !isSelectMode && (
-                          <span className="h-2 w-2 rounded-full bg-[#0b1e5b] shrink-0" />
-                        )}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <h3
+                                className={`text-sm tracking-tight ${
+                                  item.is_read
+                                    ? "font-semibold text-[#374151]"
+                                    : "font-bold text-[#0b1e5b]"
+                                }`}
+                              >
+                                {item.title}
+                              </h3>
+
+                              {!item.is_read && (
+                                <span className="rounded-full bg-[#eef3fb] px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider text-[#0b1e5b]">
+                                  New
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          <span className="shrink-0 text-[10px] font-medium text-[#9ca3af]">
+                            {formatDate(item.created_at)}
+                          </span>
+                        </div>
+
+                        <p className="mt-2 break-words text-xs leading-relaxed text-[#4b5563]">
+                          {item.message}
+                        </p>
                       </div>
-                      <p className="text-xs text-[#4b5563] leading-relaxed break-words">{item.message}</p>
-                      <span className="block pt-1 text-[10px] text-[#9ca3af] font-medium">
-                        {new Date(item.created_at).toLocaleDateString(undefined, {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </span>
+
+                      {!isSelectMode && (
+                        <button
+                          type="button"
+                          onClick={(event) =>
+                            deleteNotification(item.id, event)
+                          }
+                          className="shrink-0 rounded-lg p-2 text-[#9ca3af] transition hover:bg-red-50 hover:text-red-600 sm:opacity-0 sm:group-hover:opacity-100"
+                          title="Delete notification"
+                          aria-label="Delete notification"
+                        >
+                          <TrashIcon className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {!loading &&
+              notifications.length > 0 &&
+              !isSelectMode && (
+                <div className="mt-6 flex items-center gap-2 px-1 text-[10px] text-[#9ca3af]">
+                  <span className="h-1 w-1 rounded-full bg-[#0b1e5b]" />
+                  Long-press a notification to select multiple items.
+                </div>
+              )}
+          </section>
+        </div>
+      </div>
+
+      {/* Seller access bottom sheet drawer */}
+      {sellerPromptDrawer && (
+        <div
+          className="fixed inset-0 z-[60] flex items-end justify-center bg-[#020617]/55 p-0 backdrop-blur-[6px] sm:items-center sm:p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="seller-access-title"
+          onClick={() => setSellerPromptDrawer(false)}
+        >
+          <div
+            className="relative w-full max-w-[520px] overflow-hidden rounded-t-[30px] border border-white/60 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.25)] sm:rounded-[30px]"
+            onClick={(event) => event.stopPropagation()}
+          >
+            {/* Top accent */}
+            <div className="absolute inset-x-0 top-0 h-1 bg-[#0b1e5b]" />
+
+            {/* Decorative background */}
+            <div className="pointer-events-none absolute -right-20 -top-24 h-56 w-56 rounded-full bg-[#0b1e5b]/[0.035]" />
+            <div className="pointer-events-none absolute -left-24 top-32 h-44 w-44 rounded-full bg-[#0b1e5b]/[0.025]" />
+
+            {/* Close button */}
+            <button
+              type="button"
+              onClick={() => setSellerPromptDrawer(false)}
+              className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-xl border border-[#e5e7eb] bg-white text-[#9ca3af] shadow-sm transition-all duration-200 hover:border-[#d1d5db] hover:bg-[#f8fafc] hover:text-[#111111] active:scale-95"
+              aria-label="Close seller access dialog"
+            >
+              <XIcon className="h-4 w-4" />
+            </button>
+
+            <div className="relative px-6 pb-7 pt-8 sm:px-8 sm:pb-8 sm:pt-9">
+              {/* Verification icon */}
+              <div className="mx-auto flex h-[68px] w-[68px] items-center justify-center rounded-[22px] border border-[#d7e1ef] bg-[#f1f5fb] text-[#0b1e5b] shadow-[0_8px_25px_rgba(11,30,91,0.08)]">
+                <ShieldCheckIcon className="h-8 w-8" />
+              </div>
+
+              {/* Heading */}
+              <div className="mt-5 text-center">
+                <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-[#e5e7eb] bg-[#f8fafc] px-2.5 py-1">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#0b1e5b]" />
+                  <span className="text-[9px] font-bold uppercase tracking-[0.16em] text-[#6b7280]">
+                    Seller verification
+                  </span>
+                </div>
+
+                <h3
+                  id="seller-access-title"
+                  className="text-[22px] font-black tracking-tight text-[#111111] sm:text-2xl"
+                >
+                  Unlock seller access
+                </h3>
+
+                <p className="mx-auto mt-2 max-w-[390px] text-xs leading-[1.7] text-[#6b7280]">
+                  Your current account is registered as{" "}
+                  <span className="font-bold uppercase text-[#0b1e5b]">
+                    {profile?.role || "Member"}
+                  </span>
+                  . Complete seller verification to start listing accounts
+                  and using AccMarket escrow.
+                </p>
+              </div>
+
+              {/* Account status */}
+              <div className="mt-6 rounded-2xl border border-[#e5e7eb] bg-[#f8fafc] p-3.5">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-[#0b1e5b] shadow-sm ring-1 ring-[#e5e7eb]">
+                    <ShieldCheckIcon className="h-4 w-4" />
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#9ca3af]">
+                      Current account
+                    </p>
+
+                    <p className="mt-0.5 truncate text-xs font-bold capitalize text-[#111111]">
+                      {profile?.role || "Member"}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 rounded-full border border-[#d9f0e3] bg-[#f0fdf4] px-2.5 py-1">
+                    <CheckCircleIcon className="h-3 w-3 text-emerald-600" />
+                    <span className="text-[9px] font-bold text-emerald-700">
+                      Active
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Benefits */}
+              <div className="mt-5">
+                <p className="mb-3 px-1 text-[10px] font-bold uppercase tracking-[0.12em] text-[#9ca3af]">
+                  What you unlock
+                </p>
+
+                <div className="grid gap-2.5 sm:grid-cols-3">
+                  <div className="rounded-2xl border border-[#e5e7eb] bg-white p-3.5">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#f1f5fb] text-[#0b1e5b]">
+                      <ShieldCheckIcon className="h-4 w-4" />
                     </div>
 
-                    {!isSelectMode && (
-                      <button
-                        onClick={(e) => deleteNotification(item.id, e)}
-                        className="opacity-0 group-hover:opacity-100 transition text-[#9ca3af] hover:text-red-600 p-1.5 rounded-lg hover:bg-red-50"
-                        title="Delete notification"
-                      >
-                        ✕
-                      </button>
-                    )}
+                    <p className="mt-2.5 text-[11px] font-bold text-[#111111]">
+                      Secure escrow
+                    </p>
+
+                    <p className="mt-1 text-[9px] leading-relaxed text-[#9ca3af]">
+                      Trade through protected escrow.
+                    </p>
                   </div>
-                );
-              })
-            )}
 
-          </div>
+                  <div className="rounded-2xl border border-[#e5e7eb] bg-white p-3.5">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#f1f5fb] text-[#0b1e5b]">
+                      <ArrowRightIcon className="h-4 w-4" />
+                    </div>
 
-        </div>
-      </div>
+                    <p className="mt-2.5 text-[11px] font-bold text-[#111111]">
+                      List accounts
+                    </p>
 
-      {/* =========================================
-          COMPACT SLIDE-IN LEFT SIDEBAR DRAWER
-      ========================================= */}
-      {showPlatformDrawer && (
-        <div className="fixed inset-0 z-50 overflow-hidden">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity" onClick={() => setShowPlatformDrawer(false)} />
+                    <p className="mt-1 text-[9px] leading-relaxed text-[#9ca3af]">
+                      Create listings for buyers.
+                    </p>
+                  </div>
 
-          <div className="absolute inset-y-0 left-0 flex max-w-full pr-10">
-            <div className="w-screen max-w-xs transform bg-[#0b1e5b] p-5 shadow-2xl transition-transform duration-300 ease-in-out flex flex-col justify-between text-white">
-              <div>
-                <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-white">Platforms</h3>
-                  <button 
-                    onClick={() => setShowPlatformDrawer(false)}
-                    className="rounded-lg p-1 text-white/70 hover:bg-white/10 hover:text-white"
-                  >
-                    ✕
-                  </button>
-                </div>
+                  <div className="rounded-2xl border border-[#e5e7eb] bg-white p-3.5">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#f1f5fb] text-[#0b1e5b]">
+                      <CheckCircleIcon className="h-4 w-4" />
+                    </div>
 
-                <div className="mt-5 space-y-3 overflow-y-auto max-h-[calc(100vh-160px)] pr-1">
-                  {MARKETPLACE_PLATFORMS.map((platform) => {
-                    if (platform.hasDropdown) {
-                      return (
-                        <div key={platform.slug} className="space-y-1">
-                          <button
-                            onClick={() => setMailsOpen(!mailsOpen)}
-                            className="flex w-full items-center justify-between text-xs font-bold tracking-wide text-white/90 transition hover:text-white py-1"
-                          >
-                            <span>{platform.name}</span>
-                            <span className={`transform transition-transform text-[10px] ${mailsOpen ? "rotate-180" : ""}`}>▼</span>
-                          </button>
-                          {mailsOpen && (
-                            <div className="pl-3 space-y-2 border-l border-white/20 my-2">
-                              {platform.subItems?.map((sub) => (
-                                <Link
-                                  key={sub.slug}
-                                  href={`/marketplace?platform=${sub.slug}`}
-                                  onClick={() => setShowPlatformDrawer(false)}
-                                  className="block text-xs font-medium text-white/70 transition hover:text-white hover:translate-x-1 py-0.5"
-                                >
-                                  {sub.name}
-                                </Link>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    }
+                    <p className="mt-2.5 text-[11px] font-bold text-[#111111]">
+                      Seller profile
+                    </p>
 
-                    return (
-                      <Link
-                        key={platform.slug}
-                        href={`/marketplace?platform=${platform.slug}`}
-                        onClick={() => setShowPlatformDrawer(false)}
-                        className="block text-xs font-bold tracking-wide text-white/90 transition hover:text-white hover:translate-x-1 py-1"
-                      >
-                        {platform.name}
-                      </Link>
-                    );
-                  })}
+                    <p className="mt-1 text-[9px] leading-relaxed text-[#9ca3af]">
+                      Build buyer trust.
+                    </p>
+                  </div>
                 </div>
               </div>
 
-              <div className="border-t border-white/10 pt-3">
-                <Link
-                  href="/marketplace"
-                  onClick={() => setShowPlatformDrawer(false)}
-                  className="block w-full rounded-xl bg-white py-2.5 text-center text-xs font-bold text-[#0b1e5b] transition hover:bg-white/90"
+              {/* CTA area */}
+              <div className="mt-6">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSellerPromptDrawer(false);
+                    router.push("/dashboard/settings/upgrade-to-seller");
+                  }}
+                  className="group flex w-full items-center justify-center gap-2.5 rounded-2xl bg-[#0b1e5b] px-5 py-3.5 text-xs font-bold text-white shadow-[0_10px_25px_rgba(11,30,91,0.18)] transition-all duration-200 hover:bg-[#09184a] hover:shadow-[0_14px_30px_rgba(11,30,91,0.24)] active:scale-[0.99]"
                 >
-                  View All Listings
-                </Link>
+                  Start seller verification
+
+                  <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-white/10 transition-transform duration-200 group-hover:translate-x-0.5">
+                    <ArrowRightIcon className="h-3.5 w-3.5" />
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setSellerPromptDrawer(false)}
+                  className="mt-2.5 w-full rounded-2xl px-5 py-3 text-xs font-semibold text-[#6b7280] transition hover:bg-[#f8fafc] hover:text-[#111111]"
+                >
+                  Maybe later
+                </button>
+              </div>
+
+              {/* Security note */}
+              <div className="mt-4 flex items-center justify-center gap-1.5 text-center">
+                <ShieldCheckIcon className="h-3 w-3 text-[#9ca3af]" />
+                <span className="text-[9px] font-medium text-[#9ca3af]">
+                  Verification helps keep the AccMarket marketplace trusted.
+                </span>
               </div>
             </div>
+
+            {/* Mobile bottom safe-area spacing */}
+            <div className="h-[env(safe-area-inset-bottom)] bg-white sm:hidden" />
           </div>
         </div>
       )}
 
-      {/* =========================
-          SELLER UPGRADE PROMPT MODAL
-      ========================== */}
-      {sellerPromptModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl text-center">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-600">
-              <ShieldIcon />
-            </div>
-            <h3 className="mt-4 text-lg font-bold text-[#111111]">Vendor Access Required</h3>
-            <p className="mt-2 text-xs text-[#6b7280] leading-relaxed">
-              Your current account type is <span className="font-bold uppercase text-[#0b1e5b]">{profile?.role || "Member"}</span>. To list and sell accounts securely on escrow, you need to upgrade your profile to a verified seller/vendor account.
-            </p>
-            <div className="mt-6 flex gap-3">
-              <button
-                onClick={() => setSellerPromptModal(false)}
-                className="flex-1 rounded-xl border border-[#e5e7eb] bg-white py-2.5 text-xs font-semibold text-[#111111]"
-              >
-                Cancel
-              </button>
-              <Link
-                href="/dashboard/settings"
-                onClick={() => setSellerPromptModal(false)}
-                className="flex-1 rounded-xl bg-[#0b1e5b] py-2.5 text-xs font-semibold text-white text-center"
-              >
-                Upgrade to Seller
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* =========================
-          MOBILE BOTTOM NAV
-      ========================== */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-[#e5e7eb] bg-white/95 px-2 py-2 backdrop-blur-xl lg:hidden">
-        <div className="mx-auto grid max-w-lg grid-cols-5">
-          <BottomNav href="/dashboard" icon={<DashboardIcon />} label="Home" />
-          
-          <button
-            onClick={() => setShowPlatformDrawer(true)}
-            className="flex flex-col items-center gap-1 py-1.5 text-[10px] font-semibold text-[#9ca3af] transition hover:text-[#0b1e5b]"
-          >
-            <MarketplaceIcon />
-            Market
-          </button>
-
-          <BottomNav href="/dashboard/messages" icon={<MessageIcon />} label="Chat" />
-          <BottomNav href="/dashboard/notifications" icon={<BellIcon hasUnread={hasUnread} />} label="Notification" active />
-          <BottomNav href="/dashboard/settings" icon={<SettingsIcon />} label="Settings" />
-        </div>
-      </div>
-
+      {/* Mobile bottom navigation */}
+      <BottomNav hasUnread={hasUnread} />
     </main>
   );
-}
-
-/* =========================================
-   COMPONENTS & SVG ICONS
-========================================= */
-
-function SidebarLink({ href, label, icon, active = false }: { href: string; label: string; icon: React.ReactNode; active?: boolean }) {
-  return (
-    <Link
-      href={href}
-      className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition ${
-        active ? "bg-[#0b1e5b] text-white shadow-sm" : "text-[#6b7280] hover:bg-[#f5f7fb] hover:text-[#0b1e5b]"
-      }`}
-    >
-      {icon}
-      {label}
-    </Link>
-  );
-}
-
-function MobileLink({ href, label, icon }: { href: string; label: string; icon: React.ReactNode }) {
-  return (
-    <Link href={href} className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-[#111111] hover:bg-[#f5f7fb] hover:text-[#0b1e5b]">
-      <span className="text-[#6b7280]">{icon}</span>
-      {label}
-    </Link>
-  );
-}
-
-function BottomNav({ href, icon, label, active = false }: { href: string; icon: React.ReactNode; label: string; active?: boolean }) {
-  return (
-    <Link href={href} className={`flex flex-col items-center gap-1 py-1.5 text-[10px] font-semibold ${active ? "text-[#0b1e5b]" : "text-[#9ca3af]"}`}>
-      {icon}
-      {label}
-    </Link>
-  );
-}
-
-function DashboardIcon() {
-  return <svg className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></svg>;
-}
-function WalletIcon() {
-  return <svg className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" /><path strokeLinecap="round" strokeLinejoin="round" d="M16 12h5" /><circle cx="16" cy="12" r="1" /></svg>;
-}
-function ChartIcon() {
-  return <svg className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 19V5M4 19h16" /><path strokeLinecap="round" strokeLinejoin="round" d="M7 15l4-4 3 2 5-6" /></svg>;
-}
-function MessageIcon() {
-  return <svg className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 5h16v11H8l-4 4V5z" /></svg>;
-}
-function BellIcon({ hasUnread = false, size = 18 }: { hasUnread?: boolean; size?: number }) {
-  return (
-    <div className="relative inline-flex items-center justify-center">
-      <svg style={{ width: size, height: size }} fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2a2 2 0 01-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-      </svg>
-      {hasUnread && (
-        <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
-      )}
-    </div>
-  );
-}
-function ApiIcon() {
-  return <svg className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>;
-}
-function SupportIcon() {
-  return <svg className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path strokeLinecap="round" strokeLinejoin="round" d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" /><circle cx="12" cy="17" r=".5" fill="currentColor" /></svg>;
-}
-function SettingsIcon() {
-  return <svg className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" /><path strokeLinecap="round" strokeLinejoin="round" d="M19.4 15a1.7 1.7 0 000-6l1.1-1.8-2-2-1.8 1.1a1.7 1.7 0 00-2.4-1.4L14 3h-4l-.3 1.9a1.7 1.7 0 00-2.4 1.4L5.5 5.2l-2 2L4.6 9a1.7 1.7 0 000 6l-1.1 1.8 2 2 1.8-1.1a1.7 1.7 0 002.4 1.4L10 21h4l.3-1.9a1.7 1.7 0 002.4-1.4l1.8 1.1 2-2L19.4 15z" /></svg>;
-}
-function LogoutIcon() {
-  return <svg className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>;
-}
-function MarketplaceIcon() {
-  return <svg className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 9l2-5h14l2 5" /><path strokeLinecap="round" strokeLinejoin="round" d="M4 9v10a2 2 0 002 2h12a2 2 0 002-2V9" /><path strokeLinecap="round" strokeLinejoin="round" d="M3 9h18" /></svg>;
-}
-function ShieldIcon() {
-  return <svg className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 3l8 3v5c0 5-3.4 8.8-8 10-4.6-1.2-8-5-8-10V6l8-3z" /><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4" /></svg>;
-}
-function MoreIcon() {
-  return <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5" /><circle cx="12" cy="12" r="1.5" /><circle cx="19" cy="12" r="1.5" /></svg>;
-}
-function MenuIcon() {
-  return <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>;
-}
-function TransactionIcon() {
-  return <svg className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 7h16M4 12h16M4 17h10" /></svg>;
 }

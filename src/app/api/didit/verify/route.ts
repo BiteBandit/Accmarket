@@ -1,66 +1,89 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
 
-export async function GET(request: Request) {
-  const supabase = await createClient();
-
-  // 1. Check if user is authenticated
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
-  if (userError || !user) {
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
-
-  const apiKey = process.env.DIDIT_API_KEY;
-  const workflowId = process.env.DIDIT_WORKFLOW_ID;
-  
-  // Custom domain callback URL routing them back to the upgrade page
-  const host = request.headers.get("host") || "localhost:3000";
-  const protocol = host.includes("localhost") ? "http" : "https";
-  const callbackUrl = `https://accmarket.name.ng/dashboard/settings/upgrade-to-seller`; // Updated callback route
-
-  if (!apiKey || !workflowId) {
-    console.error("Missing Didit environment variables.");
-    return NextResponse.json(
-      { error: "Server configuration error: Missing Didit keys." },
-      { status: 500 }
-    );
-  }
-
+export async function POST(request: Request) {
   try {
-    // 2. Call Didit v3 Session API endpoint
-    const response = await fetch("https://verification.didit.me/v3/session/", {
+    const cookieStore = await cookies();
+    
+    // Create Supabase client using @supabase/ssr with awaited cookies
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value;
+          },
+        },
+      }
+    );
+
+    // 1. Authenticate user from session
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const userId = user.id;
+
+    // 2. Fetch Didit credentials from environment variables
+    const apiKey = process.env.DIDIT_API_KEY;
+    const workflowId = process.env.DIDIT_WORKFLOW_ID;
+
+    if (!apiKey || !workflowId) {
+      console.error("Missing Didit environment variables on server.");
+      return NextResponse.json(
+        { error: "Server configuration error for verification." },
+        { status: 500 }
+      );
+    }
+
+    // 3. Call Didit Sessions API with a 15-second timeout controller
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+    const diditResponse = await fetch("https://verification.didit.me/v3/session/", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
         "x-api-key": apiKey,
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         workflow_id: workflowId,
-        callback: callbackUrl,
-        vendor_data: user.id, // Binds the session back to the Supabase user ID
+        vendor_data: userId,
       }),
+      signal: controller.signal,
     });
 
-    const data = await response.json();
+    clearTimeout(timeoutId);
 
-    if (!response.ok) {
-      throw new Error(data.message || "Failed to create Didit verification session.");
+    const diditData = await diditResponse.json();
+
+    if (!diditResponse.ok) {
+      console.error("Didit API Error:", diditData);
+      return NextResponse.json(
+        { error: diditData?.message || "Failed to initialize verification session with Didit." },
+        { status: diditResponse.status }
+      );
     }
 
-    // Didit returns a hosted verification URL and session token
-    const verificationUrl = data.url || data.verification_url;
+    // Return session URL back to frontend
+    return NextResponse.json({
+      url: diditData.url,
+      sessionId: diditData.session_id,
+    });
 
-    if (!verificationUrl) {
-      throw new Error("Verification URL was not returned by Didit.");
+  } catch (error: any) {
+    console.error("Route error in /api/didit/verify:", error);
+    if (error.name === "AbortError") {
+      return NextResponse.json(
+        { error: "Didit verification service took too long to respond." },
+        { status: 504 }
+      );
     }
-
-    // 3. Redirect user to Didit's hosted identity verification flow
-    return NextResponse.redirect(verificationUrl);
-
-  } catch (err: any) {
-    console.error("Didit session error:", err);
     return NextResponse.json(
-      { error: err.message || "Internal server error during verification routing." },
+      { error: error?.message || "Internal server error." },
       { status: 500 }
     );
   }

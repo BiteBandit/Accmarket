@@ -97,12 +97,13 @@ function LoginForm() {
   }, []);
 
   // "Remember Me" / Auto-Session Check on Mount (Non-blocking)
+    // "Remember Me" / Auto-Session Check on Mount (Non-blocking)
   useEffect(() => {
     async function checkExistingSession() {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
         if (session && !error) {
-          router.push('/dashboard');
+          window.location.href = '/dashboard';
           return;
         }
 
@@ -116,7 +117,8 @@ function LoginForm() {
     }
 
     checkExistingSession();
-  }, [router, supabase]);
+  }, [supabase]);
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
