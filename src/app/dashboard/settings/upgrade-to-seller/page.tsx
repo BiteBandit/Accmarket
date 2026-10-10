@@ -59,6 +59,7 @@ function UpgradeSkeleton() {
         profile={null}
         onSignOut={handleSignOut}
         onListAccountClick={handleListAccountClick}
+        hasUnread={false}
       />
 
       {/* Real Mobile Header */}
