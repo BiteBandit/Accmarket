@@ -606,10 +606,12 @@ export default function UpgradeToSellerPage() {
     <main className="accmarket-grid min-h-screen bg-[#fdfdfc] text-[#111111]">
       {/* Shared Desktop Sidebar */}
       <DesktopSidebar
-        profile={profile}
-        onSignOut={handleSignOut}
-        onListAccountClick={handleListAccountClick}
-      />
+  profile={profile}
+  onSignOut={handleSignOut}
+  onListAccountClick={handleListAccountClick}
+  hasUnread={hasUnread}
+/>
+
 
       {/* Shared Mobile Header */}
       <MobileHeader setMobileMenuOpen={setMobileMenuOpen} />
@@ -1459,22 +1461,7 @@ function SupportIcon() {
   );
 }
 
-function ChevronIcon() {
-  return (
-    <svg
-      width="13"
-      height="13"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="m9 18 6-6-6-6" />
-    </svg>
-  );
-}
+
 
 function ChevronDownIcon() {
   return (
@@ -1493,7 +1480,7 @@ function ChevronDownIcon() {
   );
 }
 
-function ShieldIcon({ size = 18 }: { size?: number }) {
+function ShieldIcon({ className, size = 18 }: { className?: string; size?: number }) {
   return (
     <svg
       width={size}
@@ -1504,6 +1491,7 @@ function ShieldIcon({ size = 18 }: { size?: number }) {
       strokeWidth="1.8"
       strokeLinecap="round"
       strokeLinejoin="round"
+      className={className}
     >
       <path d="M12 3 20 6v5c0 5-3.4 8.5-8 10-4.6-1.5-8-5-8-10V6l8-3Z" />
       <path d="m9 12 2 2 4-4" />
@@ -1545,26 +1533,18 @@ function XIcon({ className = "h-4 w-4" }: { className?: string }) {
   );
 }
 
-function CheckIcon() {
-  return (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="m5 12 4 4L19 6" />
-    </svg>
-  );
-}
 
-function CheckCircleIcon() {
+
+
+
+function CheckCircleIcon({
+  className,
+}: {
+  className?: string;
+}) {
   return (
     <svg
+      className={className}
       width="18"
       height="18"
       viewBox="0 0 24 24"
@@ -1635,9 +1615,10 @@ function LockIcon() {
   );
 }
 
-function ArrowRightIcon() {
+function ArrowRightIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
     <svg
+      className={className}
       width="15"
       height="15"
       viewBox="0 0 24 24"
@@ -1652,6 +1633,7 @@ function ArrowRightIcon() {
     </svg>
   );
 }
+
 
 function BadgeIcon() {
   return (
@@ -1754,6 +1736,42 @@ function Spinner() {
         strokeWidth="3"
         strokeLinecap="round"
       />
+    </svg>
+  );
+}
+
+function ChevronIcon({ className = "h-3 w-3", size }: { className?: string; size?: number }) {
+  return (
+    <svg
+      className={className}
+      width={size || 13}
+      height={size || 13}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="m9 18 6-6-6-6" />
+    </svg>
+  );
+}
+
+function CheckIcon({ className = "h-3 w-3", size }: { className?: string; size?: number }) {
+  return (
+    <svg
+      className={className}
+      width={size || 12}
+      height={size || 12}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="m5 12 4 4L19 6" />
     </svg>
   );
 }

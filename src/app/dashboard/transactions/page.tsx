@@ -5,17 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { 
-  X as XIcon, 
-  Shield as ShieldIcon, 
-  ShieldCheck as ShieldCheckIcon,
-  CheckCircle as CheckCircleIcon,
-  ArrowRight as ArrowRightIcon,
-  User as UserIcon, 
-  List as ListIcon, 
-  Wallet as WalletIcon, 
-  ChevronRight as ChevronRightIcon 
-} from "lucide-react";
+
 
 
 import {
@@ -318,11 +308,13 @@ export default function TransactionsPage() {
     return (
       <div className="accmarket-grid min-h-screen bg-[#fdfdfc]">
         <div className="hidden lg:block">
-          <DesktopSidebar
+                    <DesktopSidebar
             profile={navProfile}
             onSignOut={handleSignOut}
             onListAccountClick={handleListAccountClick}
+            hasUnread={hasUnread} 
           />
+
         </div>
 
         <div className="lg:pl-[260px]">
@@ -449,10 +441,12 @@ export default function TransactionsPage() {
       <div className="accmarket-grid min-h-screen bg-[#fdfdfc]">
       <div className="hidden lg:block">
         <DesktopSidebar
-          profile={navProfile}
-          onSignOut={handleSignOut}
-          onListAccount={handleListAccountClick}
-        />
+  profile={navProfile}
+  onSignOut={handleSignOut}
+  onListAccountClick={handleListAccountClick}
+  hasUnread={hasUnread}
+/>
+
       </div>
 
       <div className="lg:pl-[260px]">
@@ -1771,6 +1765,57 @@ function ArrowLeftIcon({
     >
       <path d="M19 12H5" />
       <path d="m12 19-7-7 7-7" />
+    </svg>
+  );
+}
+
+function ShieldCheckIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 3 20 6v5c0 5-3.4 8.5-8 10-4.6-1.5-8-5-8-10V6l8-3Z" />
+      <path d="m9 12 2 2 4-4" />
+    </svg>
+  );
+}
+
+function CheckCircleIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="12" r="9" />
+      <path d="m8 12 2.5 2.5L16 9" />
+    </svg>
+  );
+}
+
+function ArrowRightIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M5 12h14" />
+      <path d="m13 6 6 6-6 6" />
     </svg>
   );
 }
